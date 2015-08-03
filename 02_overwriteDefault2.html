@@ -6,13 +6,20 @@
 </head>
 <body>
 <div id="map" class="map"></div>
+<div id="overlay" style="background-color:yellow; width:20px; height:20px; border-radius:10px;"></div>
 
 <script src="js/ol-debug.js"></script>
 <script>
 // Create Layer
-var osmLayer = new ol.layer.Tile({
+var layer = new ol.layer.Tile({
 	source: new ol.source.OSM()
 });
+
+// Create Interaction
+var interaction = new ol.interaction.DragRotateAndZoom();
+
+// Create Control
+var control = new ol.control.FullScreen();
 
 var birmingham = ol.proj.transform(
 [-1.81185,52.44314],'EPSG:4326','EPSG:3857');
@@ -23,14 +30,25 @@ var view = new ol.View({
 	zoom : 6
 });
 
+// Create Overlay
+var overlay = new ol.Overlay({
+	position: birmingham,
+	element: document.getElementById('overlay')
+})
+
 // Create Map. And bind the map to <div>.
+// Set default parameters implicity!
 var map = new ol.Map({
-	target :'map'
+	target : 'map'
 });
 
 // Integrate layer and view to map
-map.addLayer(osmLayer);
+map.addLayer(layer);
+map.addInteraction(interaction);
+map.addControl(control);
 map.setView(view);
+map.addOverlay(overlay);
+
 </script>
 </body>
 </html>
