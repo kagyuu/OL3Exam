@@ -9,13 +9,21 @@
 		margin : 0;
 	}
 	</style>
-	<title>OpenLayers 3 example 02 Components</title>
+	<title>OpenLayers 3 example 03 Overlay</title>
 </head>
 <body>
     <div id="map" class="map"></div>
+	<div id="overlay" style="background-color:white; border: 1px solid black; padding: 5px 10px;">Makkah</div>
 
 <script src="js/ol-debug.js"></script>
 <script type="text/javascript">
+
+var makkah = ol.proj.transform([39.816667, 21.416667], 'EPSG:4326', 'EPSG:3857');
+var overlay = new ol.Overlay({
+	element: document.getElementById('overlay'),
+	position: makkah,
+	positioning: 'bottom-center'
+});
 
 var map = new ol.Map({
 	target: 'map',
@@ -25,13 +33,15 @@ var map = new ol.Map({
 		})
 	],
 	view: new ol.View({
-	  center: ol.proj.transform([39.816667, 21.416667], 'EPSG:4326', 'EPSG:3857'),
+	  center: makkah,
 	  zoom: 4
 	}),
 	// Create Interaction (extends default)
 	interactions: ol.interaction.defaults().extend([new ol.interaction.DragRotateAndZoom()]),
 	// Create Control (extends default)
-	controls: ol.control.defaults().extend([new ol.control.FullScreen()])
+	controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
+	// Add Overlay
+	overlays : [overlay]
 });
 </script>
 </body>

@@ -27,7 +27,7 @@ var view = new ol.View({
 // Create Overlay
 var overlay = new ol.Overlay({
 	element: document.getElementById('overlay'),
-	positioning: 'botton-center'
+	positioning: 'bottom-center'
 })
 
 // Create Map. And bind the map to <div>.
@@ -40,6 +40,7 @@ var map = new ol.Map({
 
 map.on('click', function(event) {
 	var coord = event.coordinate;
+	console.log(coord);
 	var degrees = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
 	var hdms = ol.coordinate.toStringHDMS(degrees);
 	var element = overlay.getElement();
