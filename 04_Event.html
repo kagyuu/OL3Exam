@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	</style>
+	<title>OpenLayers 3 example 04 Event</title>
+</head>
+<body>
+    <div id="map" class="map"></div>
+	<div id="overlay" style="background-color:white; border: 1px solid black; padding: 5px 10px;">Makkah</div>
+
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+
+var makkah = ol.proj.transform([39.816667, 21.416667], 'EPSG:4326', 'EPSG:3857');
+var overlay = new ol.Overlay({
+	element: document.getElementById('overlay'),
+	position: makkah,
+	positioning: 'bottom-center'
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [
+		new ol.layer.Tile({
+			source: new ol.source.MapQuest({layer: 'sat'})
+		})
+	],
+	view: new ol.View({
+	  center: makkah,
+	  zoom: 4
+	}),
+	// Create Interaction (extends default)
+	interactions: ol.interaction.defaults().extend([new ol.interaction.DragRotateAndZoom()]),
+	// Create Control (extends default)
+	controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
+	// Add Overlay
+	overlays : [overlay]
+});
+
+map.on('click', function(event) {
+    // event is ol.MapBrowserEvent
+    // see http://openlayers.org/en/v3.8.1/apidoc/ol.Map.html -> Fires -> click
+    // see http://openlayers.org/en/v3.8.1/apidoc/ol.MapBrowserEvent.html
+	var coord = event.coordinate;
+	var degrees = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+	var hdms = ol.coordinate.toStringHDMS(degrees);
+	var element = overlay.getElement();
+	element.innerHTML = hdms;
+	overlay.setPosition(coord);
+	// map.addOverlay(overlay);
+});
+
+</script>
+</body>
+</html>

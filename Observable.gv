@@ -1,0 +1,12 @@
+digraph {
+  edge [color = "#993333", arrowtail = odot];
+  node [color = "#993333", shape = box];
+  "ol.Obserbable";
+  "ol.Object" -> "ol.Obserbable";
+  "ol.interaction.Interaction" -> "ol.Obserbable";
+  "ol.Collection" -> "ol.Object";
+  "ol.Map" -> "ol.Object";
+  "ol.layer.Base" -> "ol.Object";
+  "ol.View" -> "ol.Object";
+  "ol.control.Control" -> "ol.Object";
+}
