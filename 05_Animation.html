@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	</style>
+	<title>OpenLayers 3 example 05 Animation</title>
+</head>
+<body>
+    <div id="map" class="map" style="height:300px"></div>
+    Go to 
+    <button id="btnGoto">London</button>
+    with
+    <select id="cmbAnimation">
+    	<option>no animation</option>
+    	<option>pan</option>
+    	<option>bounce</option>
+    	<option>rotate</option>
+    	<option>zoom</option>
+    	<option>pan+bounce</option>
+    </select>
+
+<script src="js/ol-debug.js"></script>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript">
+var newyork = ol.proj.transform([-74.0022, 40.4246], 'EPSG:4326', 'EPSG:3857');
+var london = ol.proj.transform([-0.5, 51.32], 'EPSG:4326', 'EPSG:3857');
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [
+		new ol.layer.Tile({
+			source: new ol.source.MapQuest({layer: 'sat'})
+		})
+	],
+	view: new ol.View({
+	  center: newyork,
+	  zoom: 4
+	}),
+});
+
+$('#btnGoto').on('click', function() {
+	var pan = ol.animation.pan({
+		source : map.getView().getCenter()
+	});
+	var bounce = ol.animation.bounce({
+		resolution : map.getView().getResolution() * 2
+	});
+	
+	switch($('#cmbAnimation').val()){
+		case 'pan':
+			map.beforeRender(pan);
+			break;
+		case 'bounce':
+			map.beforeRender(bounce);
+			break;
+		case 'pan+bounce':
+			map.beforeRender(pan, bounce);
+			break;
+		case 'rotate':
+			map.beforeRender( ol.animation.rotate({
+				rotation : Math.PI * 2
+		 	}));
+			break;
+		case 'zoom':
+			map.beforeRender( ol.animation.zoom({
+				resolution : map.getView().getResolution() * 0.5
+		 	}));
+			break;
+		default:
+			// no animation
+			map.beforeRender();
+	}
+	
+	if ('London' === $(this).html()) {
+		map.getView().setCenter(london);
+		$(this).html('NewYork');
+	} else {
+		map.getView().setCenter(newyork);
+		$(this).html('London');
+	}	
+});
+</script>
+</body>
+</html>
