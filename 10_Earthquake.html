@@ -13,6 +13,7 @@
 </head>
 <body>
     <div id="map" class="map"></div>
+	<div id="overlay" style="background-color:white; border: 1px solid black; padding: 5px 10px;">Makkah</div>
 
 <script src="js/ol-debug.js"></script>
 <script type="text/javascript">
@@ -30,6 +31,11 @@ var vectorLayer = new ol.layer.Vector({
 	source: vectorSource
 });
 
+var overlay = new ol.Overlay({
+	element: document.getElementById('overlay'),
+	positioning: 'bottom-center'
+});
+
 var map = new ol.Map({
 	target: 'map',
 	layers: [rasterLayer, vectorLayer],
@@ -37,6 +43,24 @@ var map = new ol.Map({
 	  center: ol.proj.transform([135, 35], 'EPSG:4326', 'EPSG:3857'),
 	  zoom: 3
 	})
+});
+
+map.on('click', function(e) {
+	var coordinate = e.coordinate;
+	var pixel = map.getPixelFromCoordinate(coordinate);
+	var label = '';
+	map.forEachFeatureAtPixel(pixel, function(feature){
+		// the attribute data of GeoJSON of USGS earthquake data.
+		var attributes = feature.values_;
+		var date = new Date(attributes.time);
+		label += attributes.title + ' @ ' + date.getFullYear() + '<br/>';
+	});
+	if (label.length > 0) {
+		var element = overlay.getElement();
+		element.innerHTML = label;
+		overlay.setPosition(coordinate);
+		map.addOverlay(overlay);
+	}
 });
 </script>
 </body>
