@@ -34,7 +34,7 @@ var vectorSource = new ol.source.Vector({
 			vectorSource.addFeatures(features);
 		});
 	},
-	strategy: ol.loadingstrategy.bbox
+	strategy: ol.loadingstrategy.all
 });
 
 var vectorLayer = new ol.layer.Vector({
