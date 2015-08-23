@@ -15,6 +15,7 @@
     <div id="map" class="map"></div>
 	<div id="overlay" style="background-color:white; border: 1px solid black; padding: 5px 10px;"></div>
 
+<script src="js/jquery-2.1.4.min.js"></script>
 <script src="js/ol-debug.js"></script>
 <script type="text/javascript">
 
@@ -23,8 +24,17 @@ var rasterLayer = new ol.layer.Tile({
 });
 
 var vectorSource = new ol.source.Vector({
-	format: new ol.format.GeoJSON(),
-	url: 'js/earthquake.geojson'
+	loader: function(extent, resolution, projection) {
+		console.log(extent);
+		var url = 'js/countries.geojson';
+		$.getJSON(url, function(json) {
+			var features = new ol.format.GeoJSON().readFeatures(json,{
+				featureProjection: projection
+			});
+			vectorSource.addFeatures(features);
+		});
+	},
+	strategy: ol.loadingstrategy.bbox
 });
 
 var vectorLayer = new ol.layer.Vector({
@@ -48,19 +58,16 @@ var map = new ol.Map({
 map.on('click', function(e) {
 	var coordinate = e.coordinate;
 	var pixel = map.getPixelFromCoordinate(coordinate);
-	var label = '';
 	map.forEachFeatureAtPixel(pixel, function(feature){
-		// the attribute data of GeoJSON of USGS earthquake data.
+		// the attribute data of GeoJSON of Natural Earth data.
 		var attributes = feature.values_;
-		var date = new Date(attributes.time);
-		label += attributes.title + ' @ ' + date.getFullYear() + '<br/>';
-	});
-	if (label.length > 0) {
+		var label = attributes.formal_en;
+		
 		var element = overlay.getElement();
 		element.innerHTML = label;
 		overlay.setPosition(coordinate);
 		map.addOverlay(overlay);
-	}
+	});
 });
 </script>
 </body>
