@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	</style>
+	<title>OpenLayers 3 example 12 Polygon</title>
+</head>
+<body>
+    <div id="map" class="map"></div>
+
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+
+var featureArray = new ol.Collection();
+featureArray.push(createCircleFeature({lng:-60, lat:10}, 10));
+featureArray.push(createLineFeature({lng:-30, lat:10}, 10));
+featureArray.push(createPointFeature({lng:0, lat:10}, 10));
+featureArray.push(createRectFeature({lng:30, lat:10}, 10));
+
+var vectorSource = new ol.source.Vector({
+	features: featureArray
+});
+
+var vectorLayer = new ol.layer.Vector({
+    source : vectorSource
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [
+		new ol.layer.Tile({
+			source: new ol.source.MapQuest({layer: 'sat'})
+		}),
+		vectorLayer
+	],
+	view: new ol.View({
+	  center: ol.proj.transform([0, 0], 'EPSG:4326', 'EPSG:3857'),
+	  zoom: 2
+	})
+});
+
+/**
+ * Create Circle Feature.
+ * @param center provide center {lng,lat}
+ * @param size referential width
+ * @return feature
+ */
+function createCircleFeature(center, size) {
+	var geom = new ol.geom.Circle([center.lng, center.lat], size);
+	geom.transform('EPSG:4326', 'EPSG:3857');
+	
+	return new ol.Feature(geom);	
+}
+
+/**
+ * Create Line Feature.
+ * @param center provide center {lng,lat}
+ * @param size referential width
+ * @return feature
+ */
+function createLineFeature(center, size) {
+	var shape = [
+	    [center.lng + size, center.lat - size],   // east-south
+	    [center.lng - size, center.lat + size],   // west-north
+	    [center.lng + size, center.lat + size],   // east-north
+	];
+	var geom = new ol.geom.LineString(shape);
+	geom.transform('EPSG:4326', 'EPSG:3857');
+	
+	return new ol.Feature(geom);	
+}
+
+/**
+ * Create Circle Feature.
+ * @param center provide center {lng,lat}
+ * @param size referential width
+ * @return feature
+ */
+function createPointFeature(center, size) {
+	var geom = new ol.geom.Point([center.lng, center.lat]);
+	geom.transform('EPSG:4326', 'EPSG:3857');
+	
+	return new ol.Feature(geom);	
+}
+
+/**
+ * Create Rectangle Feature.
+ * @param center provide center {lng,lat}
+ * @param size referential width
+ * @return feature
+ */
+function createRectFeature(center, size) {
+	var shape = [
+	    [center.lng + size, center.lat - size],   // east-south
+	    [center.lng + size, center.lat + size],   // east-north
+	    [center.lng - size, center.lat + size],   // west-north
+	    [center.lng - size, center.lat - size],   // west-south
+	    [center.lng + size, center.lat - size],   // east-south (start)
+	];
+	var geom = new ol.geom.Polygon([shape]);
+	geom.transform('EPSG:4326', 'EPSG:3857');
+	
+	return new ol.Feature(geom);	
+}
+
+</script>
+</body>
+</html>
