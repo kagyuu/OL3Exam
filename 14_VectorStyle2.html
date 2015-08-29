@@ -25,17 +25,27 @@ var vectorSource = new ol.source.Vector({
 
 var countryStyle = new ol.style.Style({
 	stroke: new ol.style.Stroke({
-		color: 'darkgreen',
+		color: 'rgba(0, 128, 0, 1.0)',
 		width: 2
 	}),
 	fill : new ol.style.Fill({
 		color: 'rgba(194, 255, 194, 1)'
 	}),
+	zIndex: 2
+});
+
+var shadowStyle = new ol.style.Style({
+	stroke: new ol.style.Stroke({
+		color: 'rgba(0, 64, 0, 0.2)',
+		width: 8
+	}),
+	fill : null,
+	zIndex: 1
 });
 
 var vectorLayer = new ol.layer.Vector({
 	source: vectorSource,
-	style: countryStyle
+	style: [countryStyle, shadowStyle]
 });
 
 var map = new ol.Map({
