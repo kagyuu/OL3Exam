@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	</style>
+	<title>OpenLayers 3 example 15 Style Function</title>
+</head>
+<body>
+    <div id="map" class="map"></div>
+    <span style="background-color:gold">1. Developed region: G7</span>&nbsp;
+    <span style="background-color:orange">2. Developed region: nonG7</span>&nbsp;
+    <span style="background-color:silver">3. Emerging region: BRIC</span>&nbsp;
+    <span style="background-color:lightblue">4. Emerging region: MIKT</span>&nbsp;
+    <span style="background-color:dodgerblue; color:white">5. Emerging region: G20</span>&nbsp;
+    <span style="background-color:blue; color:white">6. Developing region</span>&nbsp;
+    <span style="background-color:darkblue; color:white">7. Least developed region</span>&nbsp;
+
+<script src="js/jquery-2.1.4.min.js"></script>
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+
+var vectorSource = new ol.source.Vector({
+	format: new ol.format.GeoJSON(),
+	url: 'js/countries.geojson'
+});
+
+var countryStyles = new Array();
+
+for (color of ['white','gold','orange','silver','lightblue','dodgerblue','blue','darkblue']) {
+	var countryStyle = new ol.style.Style({
+			stroke: new ol.style.Stroke({
+			color: 'black',
+			width: 1
+		}),
+		fill : new ol.style.Fill({
+			color: color
+		})
+	});
+
+	countryStyles.push(countryStyle);
+}
+
+var vectorLayer = new ol.layer.Vector({
+	source: vectorSource,
+	style: function(feature, resolution) {
+		try {
+			var devLevel = feature.get('economy').substring(0,1);
+			return [countryStyles[parseInt(devLevel, 10)]];
+		} catch(e) {
+			return [countryStyles[0]];
+		}
+	}
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [vectorLayer],
+	view: new ol.View({
+	  center: ol.proj.transform([135, 35], 'EPSG:4326', 'EPSG:3857'),
+	  zoom: 3
+	})
+});
+</script>
+</body>
+</html>

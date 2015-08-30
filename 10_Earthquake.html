@@ -51,9 +51,8 @@ map.on('click', function(e) {
 	var label = '';
 	map.forEachFeatureAtPixel(pixel, function(feature){
 		// the attribute data of GeoJSON of USGS earthquake data.
-		var attributes = feature.values_;
-		var date = new Date(attributes.time);
-		label += attributes.title + ' @ ' + date.getFullYear() + '<br/>';
+		var date = new Date(feature.get('time'));
+		label += feature.get('title') + ' @ ' + date.getFullYear() + '<br/>';
 	});
 	if (label.length > 0) {
 		var element = overlay.getElement();

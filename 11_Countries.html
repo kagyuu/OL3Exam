@@ -60,8 +60,7 @@ map.on('click', function(e) {
 	var pixel = map.getPixelFromCoordinate(coordinate);
 	map.forEachFeatureAtPixel(pixel, function(feature){
 		// the attribute data of GeoJSON of Natural Earth data.
-		var attributes = feature.values_;
-		var label = attributes.formal_en;
+		var label = feature.get('formal_en');
 		
 		var element = overlay.getElement();
 		element.innerHTML = label;
