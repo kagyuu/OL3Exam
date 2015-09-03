@@ -67,11 +67,6 @@ var vectorLayer = new ol.layer.Vector({
 	}	
 });
 
-var overlay = new ol.Overlay({
-	element: document.getElementById('overlay'),
-	positioning: 'bottom-center'
-});
-
 var map = new ol.Map({
 	target: 'map',
 	layers: [rasterLayer, vectorLayer],

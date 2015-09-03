@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	</style>
+	<title>OpenLayers 3 example 18 Highlight a feature</title>
+</head>
+<body>
+    <div id="map" class="map"></div>
+
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+
+var rasterLayer = new ol.layer.Tile({
+	source: new ol.source.MapQuest({layer: 'sat'})
+});
+
+var vectorSource = new ol.source.Vector({
+	format: new ol.format.GeoJSON(),
+	url: 'js/countries.geojson'
+});
+
+var normalStyle = new ol.style.Style({
+	stroke: new ol.style.Stroke({
+		color: 'gray',
+		width: 1
+	}),
+	fill : new ol.style.Fill({
+		color: 'rgba(0, 0, 0, 0)'
+	})
+});
+
+var highlightStyle = new ol.style.Style({
+	stroke: new ol.style.Stroke({
+		color: 'rgba(255,64,64,0.6)',
+		width: 2
+	}),
+	fill : new ol.style.Fill({
+		color: 'rgba(255,255,255,0.2)',
+	})
+});
+
+var vectorLayer = new ol.layer.Vector({
+	source: vectorSource,
+	style: normalStyle
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [rasterLayer,vectorLayer],
+	view: new ol.View({
+	  center: ol.proj.transform([39.816667, 21.416667], 'EPSG:4326', 'EPSG:3857'),
+	  zoom: 3
+	})
+});
+
+// a temporally layer to display small polygon and text.
+// (ol.FeatureOverlay was removed at OL3 3.7.0. cf. https://github.com/openlayers/ol3/releases/tag/v3.7.0)
+var featureOverlay = new ol.layer.Vector({
+  source: new ol.source.Vector(),
+  map: map,
+  style: [highlightStyle]
+});
+
+var highlightFeature;
+map.on('pointermove', function(browserEvent) {
+	var coordinate = browserEvent.coordinate;
+	var pixel = browserEvent.pixel;
+	
+	var featureSource = featureOverlay.getSource();
+	if (highlightFeature) {
+		// delete the former highlighted feature from the featureOverlay.
+		// if mouse is pointing sea, there will be no highlighted feature.
+		featureSource.removeFeature(highlightFeature);
+		highlightFeature = null;
+	}
+	map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+		if (layer != vectorLayer) {
+			return;
+		}
+		if (highlightFeature) {
+			// delete the former highlighted feature from the featureOverlay
+			featureSource.removeFeature(highlightFeature);
+		}
+		// add current a pointed feature to the featureOverlay
+		featureSource.addFeature(feature);
+		highlightFeature = feature;
+	});
+});
+</script>
+</body>
+</html>
