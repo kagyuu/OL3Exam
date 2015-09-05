@@ -9,7 +9,7 @@
 		margin : 0;
 	}
 	</style>
-	<title>OpenLayers 3 example 18 Highlight a feature</title>
+	<title>OpenLayers 3 example 19 Flag</title>
 </head>
 <body>
     <div id="map" class="map"></div>
@@ -61,36 +61,29 @@ var map = new ol.Map({
 });
 
 // a temporally layer to display small polygon and text.
-// (ol.FeatureOverlay was removed at OL3 3.7.0. cf. https://github.com/openlayers/ol3/releases/tag/v3.7.0)
+// (ol.FeatureOverlay was integrated to ol.layer.Vector at OL3 3.7.0.
+// cf. https://github.com/openlayers/ol3/releases/tag/v3.7.0)
 var featureOverlay = new ol.layer.Vector({
   source: new ol.source.Vector(),
   map: map,
   style: [highlightStyle]
 });
 
-var highlightFeature;
 map.on('pointermove', function(browserEvent) {
 	var coordinate = browserEvent.coordinate;
 	var pixel = browserEvent.pixel;
 	
+	// delete the former highlighted feature from the featureOverlay.
+    // if mouse is pointing sea, there will be no highlighted feature because map.forEach do nothing.
 	var featureSource = featureOverlay.getSource();
-	if (highlightFeature) {
-		// delete the former highlighted feature from the featureOverlay.
-		// if mouse is pointing sea, there will be no highlighted feature.
-		featureSource.removeFeature(highlightFeature);
-		highlightFeature = null;
-	}
+	featureSource.clear();
 	map.forEachFeatureAtPixel(pixel, function(feature, layer) {
 		if (layer != vectorLayer) {
 			return;
 		}
-		if (highlightFeature) {
-			// delete the former highlighted feature from the featureOverlay
-			featureSource.removeFeature(highlightFeature);
-		}
+		featureSource.clear();
 		// add current a pointed feature to the featureOverlay
 		featureSource.addFeature(feature);
-		highlightFeature = feature;
 	});
 });
 </script>

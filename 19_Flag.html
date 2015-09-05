@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	</style>
+	<title>OpenLayers 3 example 19 Flags</title>
+</head>
+<body>
+    <div id="map" class="map"></div>
+
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+
+var rasterLayer = new ol.layer.Tile({
+	source: new ol.source.MapQuest({layer: 'sat'})
+});
+
+var vectorSource = new ol.source.Vector({
+	format: new ol.format.GeoJSON(),
+	url: 'js/countries.geojson'
+});
+
+var normalStyle = new ol.style.Style({
+	stroke: new ol.style.Stroke({
+		color: 'gray',
+		width: 1
+	}),
+	fill : new ol.style.Fill({
+		color: 'rgba(0, 0, 0, 0)'
+	})
+});
+
+var vectorLayer = new ol.layer.Vector({
+	source: vectorSource,
+	style: normalStyle
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [rasterLayer,vectorLayer],
+	view: new ol.View({
+	  center: ol.proj.transform([39.816667, 21.416667], 'EPSG:4326', 'EPSG:3857'),
+	  zoom: 3
+	})
+});
+
+var highlightStyle = new ol.style.Style({
+	stroke: new ol.style.Stroke({
+		color: 'rgba(255,64,64,0.6)',
+		width: 2
+	}),
+	fill : new ol.style.Fill({
+		color: 'rgba(255,255,255,0.2)',
+	}),
+	zIndex : 1
+});
+
+function highlightFunc(feature, resolution) {
+	var geometry = feature.getGeometry();
+	if (geometry.getType() == 'Point') {
+		var countryNameStyle = new ol.style.Style({
+			text : new ol.style.Text({
+				font : '20px Monospace',
+				text : feature.get('name'),
+				fill : new ol.style.Fill({
+					color: 'white'
+				}),
+				stroke : new ol.style.Stroke({
+					color: 'black'
+				}),
+				textAlign: 'left',
+				textBaseline: 'top',
+				offsetY: -10,
+				offsetX: 16
+			}),
+			image : new ol.style.Icon({
+				src: 'img/flags/flags_iso/32/' + feature.get('iso') + '.png'
+			}),
+			zIndex : 2
+		});
+		return [countryNameStyle];	
+	} else {
+		return [highlightStyle];
+	}	
+}
+
+// a temporally layer to display small polygon and text.
+// (ol.FeatureOverlay was integrated to ol.layer.Vector at OL3 3.7.0.
+// cf. https://github.com/openlayers/ol3/releases/tag/v3.7.0)
+var featureOverlay = new ol.layer.Vector({
+  source: new ol.source.Vector(),
+  map: map,
+  style: highlightFunc
+});
+
+map.on('pointermove', function(browserEvent) {
+	var coordinate = browserEvent.coordinate;
+	var pixel = browserEvent.pixel;
+	
+	// delete the former highlighted feature from the featureOverlay.
+    // if mouse is pointing sea, there will be no highlighted feature because map.forEach do nothing.
+	var featureSource = featureOverlay.getSource();    
+	featureSource.clear();
+	map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+		if (layer != vectorLayer) {
+			return;
+		}
+		featureSource.clear();
+		// add current a pointed feature to the featureOverlay for draw country area
+		featureSource.addFeature(feature);
+		
+		// add center of the feature to the featureOverlay for draw flag and country name text
+		var geometry = feature.getGeometry();
+		var point;
+		switch (geometry.getType()) {
+		case 'Polygon' :
+			// this country has no detached place.
+			point = geometry.getInteriorPoint();
+			break;
+		case 'MultiPolygon' :
+			// this country has some detached place.
+			// multiPoint:ol.geom.MultiPoint contains each center point of detached place.
+			var multiPoint = geometry.getInteriorPoints();
+			// get the closest center point of mouse pointer
+			point = new ol.geom.Point(multiPoint.getClosestPoint(coordinate));
+			break;
+		default :
+			// Illegal shape
+			point = new ol.geom.Point(geometry.getClosestPoint(coordinate));
+			break;
+		}
+		
+		var textFeature = new ol.Feature({
+			geometry: point,
+			name: feature.get('name'),
+			iso: feature.get('iso_a2')
+		});
+		featureSource.addFeature(textFeature);
+	});
+});
+</script>
+</body>
+</html>
