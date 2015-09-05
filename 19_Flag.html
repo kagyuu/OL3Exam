@@ -139,7 +139,7 @@ map.on('pointermove', function(browserEvent) {
 		var textFeature = new ol.Feature({
 			geometry: point,
 			name: feature.get('name'),
-			iso: feature.get('iso_a2')
+			iso: feature.get('iso_a2').toLowerCase()
 		});
 		featureSource.addFeature(textFeature);
 	});
