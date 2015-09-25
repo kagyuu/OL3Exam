@@ -1,4 +1,5 @@
-map {
+.map {
 	width: 100%;
-	background-color: #b5f0f0;
+	background-color: ghostwhite;
+	border: 1px gray;
 }

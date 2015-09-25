@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	table {
+		width:80%;
+		border-collapse: separate;
+		border-spacing: 0px;
+		border-top: 1px solid #ccc;
+		border-left: 1px solid #ccc;
+	}
+	th{
+		padding: 4px;
+		text-align: left;
+		vertical-align: top;
+		color: #444;
+		background-color: #ccc;
+		border-top: 1px solid #fff;
+		border-left: 1px solid #fff;
+		border-right: 1px solid #ccc;
+		border-bottom: 1px solid #ccc;
+	}
+	td{
+		padding: 4px;
+		background-color: #fafafa;
+		border-right: 1px solid #ccc;
+		border-bottom: 1px solid #ccc;
+	}
+	</style>
+	<title>OpenLayers 3 example 13 Vector Style</title>
+</head>
+<body>
+	<select>
+		<option value="EPSG:4326" selected="selcted">EPSG 4326 (WGS 84 -- WGS84 - World Geodetic System 1984 正距円筒図法, used in GPS)</option>
+		<option value="EPSG:3857">EPSG 3857 (WGS 84 / Pseudo-Mercator -- Spherical Mercator 正角円筒図法, Google Maps, OpenStreetMap, Bing, ArcGIS, ESRI)</option>
+		<option value="EPSG:4087">EPSG:4087 (WGS 84 / World Equidistant Cylindrical 正積円筒図法)</option>
+		<option value="ESRI:54009">ESRI:54009 (World Mollweide 正積擬円筒図法)</option>
+		<option value="ESRI:54032">ESRI:54032 (World Azimuthal Equidistant 正距方位図法)</option>
+	<select>
+    <div id="map" class="map"></div>
+    <table>
+		<tr><th>Code</th><th>Extent</th><th>Meters Per Unit</th><th>Unit</th><th>is Global?</th></tr>
+		<tr>
+			<td><span id="code"></span></td>
+			<td><span id="extent"></span></td>
+			<td><span id="meter"></span></td>
+			<td><span id="unit"></span></td>
+			<td><span id="isGlobal"></span></td>
+		</tr>
+	</table>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.10/proj4.js"></script>
+<script src="http://epsg.io/3410.js"></script>
+<script src="http://epsg.io/4087.js"></script>
+<script src="http://epsg.io/54009.js"></script>
+<script src="http://epsg.io/54032.js"></script>
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+var wgs84Sphere = new ol.Sphere(6378137);
+
+// --(1) Create World Map
+function createWorldMapLayer() {
+	var worldMapSource = new ol.source.Vector({
+		format: new ol.format.GeoJSON(),
+		url: 'js/countries.geojson'
+	});
+	
+	var worldMapStyle = new ol.style.Style({
+		stroke: new ol.style.Stroke({
+			color: 'lightgreen',
+			width: 2
+		}),
+		fill : new ol.style.Fill({
+			color: 'rgba(250, 255, 250, 1)'
+		}),
+	});
+	
+	var worldMapLayer = new ol.layer.Vector({
+		source: worldMapSource,
+		style: worldMapStyle
+	});
+	
+	return worldMapLayer;	
+}
+
+// --(2) Create Circles (Tissot's indicatrix)
+function createCircles(projection) {
+	var featureArray = new ol.Collection();
+	for (var lat = -60; lat < 90; lat +=30) {
+		for (var lng = -180; lng < 180; lng += 30) {
+			var geom = ol.geom.Polygon.circular(wgs84Sphere, [lng, lat], 800000, 32);
+			geom.transform('EPSG:4326', projection);
+			featureArray.push(new ol.Feature(geom));	
+		}
+	}
+	
+	var circleLayer = new ol.layer.Vector({
+	  source : new ol.source.Vector({
+		features: featureArray
+	  })
+	});
+	
+	return circleLayer;
+}
+
+// --(3) Projection Info
+function showProjectionInfo(proj) {
+	$('#code').text(proj.getCode());
+	$('#extent').text(proj.getExtent());
+	$('#meter').text(proj.getMetersPerUnit());
+	$('#unit').text(proj.getUnits());
+	$('#isGlobal').text(proj.isGlobal() ? 'Global' : 'Local');
+}
+
+// --(4) Create Map
+var map = new ol.Map({
+	target: 'map',
+	layers: [createWorldMapLayer(), createCircles('EPSG:4326')],
+	view: new ol.View({
+	  projection : 'EPSG:4326',
+	  center: [0,0],
+	  zoom: 2
+	})
+});
+showProjectionInfo(map.getView().getProjection());
+
+// -- (5) Create the graticule component
+var graticule = new ol.Graticule({
+  maxLines: 6,
+  strokeStyle: new ol.style.Stroke({
+    color: 'lightblue',
+    width: 2,
+    lineDash: [0.5, 4]
+  })
+});
+graticule.setMap(map);
+
+// -- (6) Projection Change
+$('select').on('change', function(e) {
+	var projection = $(this).val();
+	
+	for (var cnt = 0; cnt < 100 && map.getLayers().getLength() > 0; cnt++) {
+		map.getLayers().forEach(function(elem, idx, ary){
+			map.removeLayer(elem);
+		});
+	}
+	
+	var center = ol.proj.transform(map.getView().getCenter(), map.getView().getProjection(), projection);
+	var zoom = map.getView().getZoom();
+	
+	map.setView(new ol.View({
+	  projection : projection,
+	  center: center,
+	  zoom: zoom
+	}));
+
+	showProjectionInfo(map.getView().getProjection());
+	map.addLayer(createWorldMapLayer());
+	map.addLayer(createCircles(projection));	
+});
+</script>
+</body>
+</html>
