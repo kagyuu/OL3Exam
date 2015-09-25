@@ -1,6 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html lang="jp">
 <head>
+	<title>OpenLayers 3 example 13 Vector Style</title>
+	<meta charset="UTF-8">
 	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
 	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
 	<style>
@@ -33,7 +35,6 @@
 		border-bottom: 1px solid #ccc;
 	}
 	</style>
-	<title>OpenLayers 3 example 13 Vector Style</title>
 </head>
 <body>
 	<select>
@@ -43,6 +44,7 @@
 		<option value="ESRI:54009">ESRI:54009 (World Mollweide 正積擬円筒図法)</option>
 		<option value="ESRI:54032">ESRI:54032 (World Azimuthal Equidistant 正距方位図法)</option>
 	<select>
+	<button onclick="javascript:location.reload()">refresh</button>
     <div id="map" class="map"></div>
     <table>
 		<tr><th>Code</th><th>Extent</th><th>Meters Per Unit</th><th>Unit</th><th>is Global?</th></tr>
@@ -112,7 +114,12 @@ function createCircles(projection) {
 // --(3) Projection Info
 function showProjectionInfo(proj) {
 	$('#code').text(proj.getCode());
-	$('#extent').text(proj.getExtent());
+	var extentAry = proj.getExtent();
+	if (extentAry) {
+		$('#extent').text("(" + extentAry[0] + "," + extentAry[1] + ") - (" + extentAry[2] + "," + extentAry[3] + ")");
+	} else {
+		$('#extent').text('');
+	}
 	$('#meter').text(proj.getMetersPerUnit());
 	$('#unit').text(proj.getUnits());
 	$('#isGlobal').text(proj.isGlobal() ? 'Global' : 'Local');
