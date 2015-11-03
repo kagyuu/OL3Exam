@@ -47,8 +47,7 @@ dragAndDropInteraction.on('addfeatures', function(event) {
   });
   map.addLayer(new ol.layer.Image({
     source: new ol.source.ImageVector({
-      source: vectorSource,
-      //style: styleFunction
+      source: vectorSource
     })
   }));
 });
