@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	input[name='drawType'] {
+		-webkit-appearance: none;
+		position: relative;
+		display: inline-block;
+	    background-image: url(img/interaction_icons.png);
+	    overflow: hidden;
+		width: 48px;
+		height: 48px;
+	}
+	</style>
+	<title>OpenLayers 3 example 23 Draw</title>
+</head>
+<body>
+<div id="map" class="map" style="width:640px;height:400px"></div>
+<p>
+<input type="radio" name="drawType" value="None"       style="background-position: 0px 0px" checked="checked">
+<input type="radio" name="drawType" value="Point"      style="background-position: -48px -48px">
+<input type="radio" name="drawType" value="LineString" style="background-position: -96px -48px">
+<input type="radio" name="drawType" value="Polygon"    style="background-position: -144px -48px">
+<input type="radio" name="drawType" value="Circle"     style="background-position: -192px -48px">
+<input type="radio" name="drawType" value="Square"     style="background-position: -240px -48px">
+<input type="radio" name="drawType" value="Box"        style="background-position: -288px -48px">
+</p>
+<div id="selected"></div>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+
+var rasterLayer = new ol.layer.Tile({
+	source: new ol.source.MapQuest({layer: 'sat'})
+});
+
+var vectorSource = new ol.source.Vector();
+
+var vectorLayer = new ol.layer.Vector({
+	source: vectorSource,
+	style: new ol.style.Style({
+		fill: new ol.style.Fill({
+			color: 'rgba(255,192,192,0.5)'
+		}),
+		stroke: new ol.style.Stroke({
+			color: 'red',
+			width: 2
+		}),
+		image: new ol.style.Circle({
+			radius: 7,
+			fill: new ol.style.Fill({
+				color: 'red'
+			})
+		})
+	})
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [rasterLayer, vectorLayer],
+	view: new ol.View({
+	  center: ol.proj.transform([39.816667, 21.416667], 'EPSG:4326', 'EPSG:3857'),
+	  zoom: 4
+	})
+});
+
+var drawInteraction = null;
+$("input[name='drawType']").change(function(){
+	// change icons
+	$("input[name='drawType']").each(function(){
+	    var positions = $(this).css("background-position").split(" ");
+	    if($(this).is(":checked")){
+	    	$(this).css("background-position", positions[0] + ' 0px');
+	    } else {
+	    	$(this).css("background-position", positions[0] + ' -48px');
+	    }		
+	});
+	// change interaction
+	if (drawInteraction) {
+		map.removeInteraction(drawInteraction);	
+	}
+	var type = $("input[name='drawType']:checked").val();
+	switch (type) {
+		case 'Point' :
+		case 'LineString' :
+		case 'Polygon' :
+		case 'Circle' :
+			drawInteraction = new ol.interaction.Draw({
+				source : vectorSource,
+				type : type
+			});
+			map.addInteraction(drawInteraction);
+			break;
+		case 'Square' :
+			// If you want to make a regular polygon (正多角形), set type as 'Circle' 
+			// and geometryFucntion as ol.interaction.Draw.createRegularPolygon().
+			drawInteraction = new ol.interaction.Draw({
+				source : vectorSource,
+				type : 'Circle',
+				geometryFunction : ol.interaction.Draw.createRegularPolygon(4)
+			});
+			map.addInteraction(drawInteraction);
+			break;
+		case 'Box' :
+			// Overwrite LinsString behavior
+			drawInteraction = new ol.interaction.Draw({
+				source : vectorSource,
+				type : 'LineString',
+				maxPoints : 2,
+				geometryFunction : function(coordinates, geometry) {
+					if (!geometry) {
+						geometry = new ol.geom.Polygon(null);
+					}
+					//        nw(mouse start)       ne
+					// latN  *----------------------+
+					//       |                      |
+					//       |sw                    |se(mouse end)
+					// latS  +----------------------*
+					//       lonW                   lonE
+					var nw = coordinates[0];
+					var se = coordinates[1];
+					var latN = nw[0];
+					var latS = se[0];
+					var lonW = nw[1];
+					var lonE = se[1];
+					var ne = [latN,lonE];
+					var sw = [latS,lonW];
+					geometry.setCoordinates([[nw,ne,se,sw,nw]]);
+					return geometry;
+				}
+			});
+			map.addInteraction(drawInteraction);		
+			break;
+		default :
+			break;
+	}
+	if (drawInteraction) {
+		drawInteraction.on('drawend', function(event /* ol.interaction.DrawEvent */) {
+			var format = new ol.format.WKT();
+			var geometry = (event.feature.getGeometry()).clone();
+			try {
+				$('#selected').html(format.writeGeometry(geometry.transform('EPSG:3857', 'EPSG:4326')));
+			} catch(e) {
+				console.log(e);
+				$('#selected').html(e.message);
+			}
+		});
+	}	
+});
+
+</script>
+</body>
+</html>

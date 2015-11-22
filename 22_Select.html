@@ -108,10 +108,10 @@ selectInteraction.on('select', function(event /* ol.interaction.SelectEvent */){
 
 // DragBox Event
 dragBoxInteraction.on('boxend', function(e) {
-  var extent = dragBoxInteraction.getGeometry().getExtent();
-  vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
-    selectedFeatures.push(feature);
-  });
+	var extent = dragBoxInteraction.getGeometry().getExtent();
+	vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
+		selectedFeatures.push(feature);
+	});
 	var names = '';
 	selectedFeatures.forEach(function(feature){
 		names += feature.values_.name + '&nbsp;';
