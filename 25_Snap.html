@@ -9,7 +9,7 @@
 		margin : 0;
 	}
 	</style>
-	<title>OpenLayers 3 example 24 Modify</title>
+	<title>OpenLayers 3 example 25 Snap</title>
 </head>
 <body>
 <div id="map" class="map" style="width:640px;height:400px"></div>
@@ -66,6 +66,12 @@ var modifyInteraction = new ol.interaction.Modify({
 	}
 })
 map.addInteraction(modifyInteraction);
+
+// We must add Snap AFTER Draw and Modify.
+var snapInteraction = new ol.interaction.Snap({
+	source: vectorSource
+});
+map.addInteraction(snapInteraction);
 </script>
 </body>
 </html>
