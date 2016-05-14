@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	</style>
+	<title>OpenLayers 3 example 27 Control</title>
+</head>
+<body>
+    <div id="map" class="map"></div>
+
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+
+var mousePosition = new ol.control.MousePosition({
+//	coordinateFormat: ol.coordinate.createStringXY(2),
+	coordinateFormat: ol.coordinate.toStringHDMS,
+	projection: 'EPSG:4326',
+	undefinedHTML: 'Outside'
+});
+
+var scaleLine = new ol.control.ScaleLine({
+	minWidth: 100,
+	units: /** @type {olx.control.AttributionOptions} */ 'nautical'
+});
+
+var zoomSlider = new ol.control.ZoomSlider();
+
+var zoomToExtent = new ol.control.ZoomToExtent({
+	extent: ol.proj.transformExtent([120, 20, 150, 50], 'EPSG:4326', 'EPSG:3857')
+});
+
+var overviewMap = new ol.control.OverviewMap();
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [
+		new ol.layer.Tile({
+			source: new ol.source.OSM()
+		})
+	],
+	view: new ol.View({
+	  center: ol.proj.transform([39.816667, 21.416667], 'EPSG:4326', 'EPSG:3857'),
+	  zoom: 4
+	}),
+	controls: ol.control.defaults({
+	  zoom: true,
+	  attribution: true,
+      attributionOptions: /** @type {ol.control.ScaleLineUnits} */ ({
+        collapsible: false
+      }),
+      rotate: true
+	}).extend([
+	  new ol.control.FullScreen(),
+	  mousePosition,
+	  scaleLine,
+	  zoomSlider,
+	  zoomToExtent,
+	  overviewMap
+	])
+});
+</script>
+</body>
+</html>
