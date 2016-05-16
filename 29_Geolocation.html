@@ -50,7 +50,7 @@ var geolocation = new ol.Geolocation({
 	  // raw html5 geolocation options
 	  // see https://www.w3.org/TR/geolocation-API/#position_options_interface
 	  enableHighAccuracy: true,
-	  timeout: 5000, // timeout (millisec)
+	  timeout: 5000, // timeout (millisec) -> TIMEOUT Error
 	  maximumAge: 1000 // cache life time of location (millisec)
   }
 });
@@ -68,7 +68,7 @@ geolocation.on('change', function(evt) {
   featureArray.push(new ol.Feature(geolocation.getAccuracyGeometry()));
 });
 
-geolocation.on('error', function(err) {
+geolocation.on('error', function(e) {
   switch(e.code) {
   case 1 :
     alert('Error 1 : PERMISSION_DENIED');
