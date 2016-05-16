@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+	<link rel="stylesheet" href="css/sample.css" type="text/css"/>
+	<style>
+	body {
+		padding : 0;
+		margin : 0;
+	}
+	</style>
+	<title>OpenLayers 3 example 29 Geo Location</title>
+</head>
+<body>
+    <div id="map" class="full-map"></div>
+
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+
+var featureArray = new ol.Collection();
+ 
+var vectorSource = new ol.source.Vector({
+    features: featureArray
+});
+ 
+var vectorLayer = new ol.layer.Vector({
+    source : vectorSource
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [
+		new ol.layer.Tile({
+			source: new ol.source.OSM()
+		}),
+		vectorLayer
+	],
+	view: new ol.View({
+	  center: ol.proj.transform([0, 0], 'EPSG:4326', 'EPSG:3857'),
+	  zoom: 18
+	}),
+});
+
+var geolocation = new ol.Geolocation({
+  // take the projection to use from the map's view
+  projection: map.getView().getProjection(),
+  tracking: true,
+  trackingOptions: {
+	  // raw html5 geolocation options
+	  // see https://www.w3.org/TR/geolocation-API/#position_options_interface
+	  enableHighAccuracy: true,
+	  timeout: 5000, // timeout (millisec)
+	  maximumAge: 1000 // cache life time of location (millisec)
+  }
+});
+// listen to changes in position
+geolocation.on('change', function(evt) {
+
+  map.getView().setCenter(geolocation.getPosition());
+  
+  var heading = geolocation.getHeading();
+  if (heading) {
+  	// some smart-phones and PCs has no heading information
+  	map.getView().rotate(geolocation.getHeading());  
+  }
+  featureArray.clear();
+  featureArray.push(new ol.Feature(geolocation.getAccuracyGeometry()));
+});
+
+geolocation.on('error', function(err) {
+  switch(e.code) {
+  case 1 :
+    alert('Error 1 : PERMISSION_DENIED');
+    break;
+  case 2 :
+    alert('Error 2 : POSITION UNAVAILABLE');
+    break;
+  case 3 :
+    alert('Error 3 : TIMEOUT');
+    break;
+  default :
+    alert('Error ' + e.code + ' : UNKNOWN ERROR');
+    break;
+  }
+});
+</script>
+</body>
+</html>

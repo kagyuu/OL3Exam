@@ -4,6 +4,12 @@
 	border: 1px gray;
 }
 
+.full-map {
+	width: 100%;
+	height: 100%;
+	position:fixed
+}
+
 .ol-full-screen {
 	position: fixed;
 	top: 10px;
