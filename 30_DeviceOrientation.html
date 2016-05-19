@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<title>OpenLayers 3 example 30 Device Orientation</title>
+</head>
+<body>
+<table>
+	<tbody>
+		<tr><td>alpha</td><td>:<span id="alpha"></span></td></tr>
+		<tr><td>beta</td><td>:<span id="beta"></span></td></tr>
+		<tr><td>gamma</td><td>:<span id="gamma"></span></td></tr>
+		<tr><td>heading</td><td>:<span id="heading"></span></td></tr>
+	</tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="js/ol-debug.js"></script>
+<script type="text/javascript">
+var orientation = new ol.DeviceOrientation({tracking:true});
+
+// listen to changes in orientation
+orientation.on('change', function(evt) {
+  $('#alpha').html(orientation.getAlpha());
+  $('#beta').html(orientation.getBeta());
+  $('#gamma').html(orientation.getGamma());
+  $('#heading').html(orientation.getHeading());
+  console.log(orientation);
+});
+</script>
+</body>
+</html>
