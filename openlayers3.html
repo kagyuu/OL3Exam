@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+    <style>
+     .map {
+        height : 320px;
+        width  : 480px;
+        border : 1px solid black;
+      }
+    </style>
+	<script src="js/ol-debug.js"></script>
+    <title>OpenLayers 3 example</title>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <script type="text/javascript">
+      var layers = [
+        new ol.layer.Image({
+          source : new ol.source.ImageWMS({
+            url : 'https://hondou.homedns.org/mapserver/cgi-bin/mapserv?map=/opt/maps/map07.map',
+            params: {
+              // these are simply added to http-get parameter
+              'LAYERS' : 'countries,lakes,rivers,cities,roads,rails',
+              'TRANSPARENT' : 'FALSE'
+            },
+          })
+        })
+      ];
+
+      var map = new ol.Map({
+        target: 'map',
+        layers : layers,
+        view: new ol.View({
+          center: ol.proj.transform([135.0, 35.0], 'EPSG:4326', 'EPSG:3857'),
+          zoom: 4
+        })
+      });
+    </script>
+  </body>
+</html>

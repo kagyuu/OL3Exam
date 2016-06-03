@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+	<link rel="stylesheet" href="css/ol.css" type="text/css"/>
+    <style>
+      .map {
+        height : 480px;
+        width  : 800px;
+        border : 1px solid black;
+      }
+    </style>
+	<script src="js/ol-debug.js"></script>
+    <title>OpenLayers 3 example</title>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <script type="text/javascript">
+      var layers = [
+        new ol.layer.Tile({
+          source : new ol.source.TileWMS({
+            url : 'https://hondou.homedns.org/mapserver/mapcache?',
+            params: {
+              // these are simply added to http-get parameter
+              'LAYERS' : 'test',
+              'TRANSPARENT' : 'FALSE'
+            }
+          })
+        })
+      ];
+ 
+      var map = new ol.Map({
+        target: 'map',
+        layers : layers,
+        view: new ol.View({
+          center: ol.proj.transform([135.0, 35.0], 'EPSG:4326', 'EPSG:3857'),
+          zoom: 2
+        })
+      });
+    </script>
+  </body>
+</html>
